@@ -8,7 +8,7 @@ function handleError(err, res, req) {
     res.status(ERROR_CODE).send({ message: 'Переданы некорректные данные в методы создания карточки, пользователя, обновления аватара пользователя или профиля' });
     return;
   }
-  if (req.user._id === null) {
+  if (req.user._id === undefined) {
     res.status(ERROR_ID).send({ message: 'Карточка или пользователь не найден' });
     return;
   }
@@ -22,6 +22,7 @@ module.exports.getUsers = (req, res) => {
 };
 
 module.exports.doesUserExist = (req, res) => {
+  console.log(req.user._id)
   User.findById(req.params.userId)
     .then((user) => res.send({ data: user }))
     .catch((err) => handleError(err, res, req));
