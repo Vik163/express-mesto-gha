@@ -1,14 +1,14 @@
 const User = require('../models/user');
 
-function handleError(err, res) {
+function handleError(err, res, req) {
   const ERROR_CODE = 400;
   const ERROR_ID = 404;
   const ERROR_SERVER = 500;
-  if (err.name === 'ValidationError') {
+  if (err.name === 'ValidationError' || !(req.user._id === req.params.userId)) {
     res.status(ERROR_CODE).send({ message: 'Переданы некорректные данные в методы создания карточки, пользователя, обновления аватара пользователя или профиля' });
     return;
   }
-  if (err.name === 'CastError') {
+  if (req.user._id === null) {
     res.status(ERROR_ID).send({ message: 'Карточка или пользователь не найден' });
     return;
   }
@@ -24,7 +24,7 @@ module.exports.getUsers = (req, res) => {
 module.exports.doesUserExist = (req, res) => {
   User.findById(req.params.userId)
     .then((user) => res.send({ data: user }))
-    .catch((err) => handleError(err, res));
+    .catch((err) => handleError(err, res, req));
 };
 
 module.exports.createUser = (req, res) => {
