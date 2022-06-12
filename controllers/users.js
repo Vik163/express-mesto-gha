@@ -4,7 +4,7 @@ function handleError(err, res, req) {
   const ERROR_CODE = 400;
   const ERROR_ID = 404;
   const ERROR_SERVER = 500;
-  if (err.name === 'ValidationError' && err === 'errorValid') {
+  if (err.name === 'ValidationError' || err === 'errorValid') {
     res.status(ERROR_CODE).send({ message: 'Переданы некорректные данные в методы создания карточки, пользователя, обновления аватара пользователя или профиля' });
     return;
   }
@@ -51,7 +51,6 @@ module.exports.updateUser = (req, res) => {
     req.user._id,
     { name, about, avatar },
     {
-
       new: true,
       runValidators: true,
     },
