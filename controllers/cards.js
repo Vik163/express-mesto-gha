@@ -4,11 +4,11 @@ function handleError(err, res) {
   const ERROR_CODE = 400;
   const ERROR_ID = 404;
   const ERROR_SERVER = 500;
-  if (err.name === 'ValidationError') {
+  if (err.name === 'ValidationError' || err.name === 'CastError' || err === 'errorValid') {
     res.status(ERROR_CODE).send({ message: 'Переданы некорректные данные в методы создания карточки, пользователя, обновления аватара пользователя или профиля' });
     return;
   }
-  if (err.name === 'CastError') {
+  if (err === 'error') {
     res.status(ERROR_ID).send({ message: 'Карточка или пользователь не найден' });
     return;
   }
@@ -45,7 +45,17 @@ module.exports.addLike = (req, res) => {
       runValidators: true,
     },
   )
-    .then((card) => res.send({ data: card }))
+    .then((card) => {
+      if (res.statusCode === 200 && card === null) {
+        const err = 'error';
+        throw err;
+      }
+      if (!(req.user._id === req.params.cardId)) {
+        const err = 'errorValid';
+        throw err;
+      }
+      res.send(card);
+    })
     .catch((err) => handleError(err, res));
 };
 
@@ -58,6 +68,16 @@ module.exports.deleteLike = (req, res) => {
       runValidators: true,
     },
   )
-    .then((card) => res.send({ data: card }))
+    .then((card) => {
+      if (res.statusCode === 200 && card === null) {
+        const err = 'error';
+        throw err;
+      }
+      if (!(req.user._id === req.params.cardId)) {
+        const err = 'errorValid';
+        throw err;
+      }
+      res.send(card);
+    })
     .catch((err) => handleError(err, res));
 };

@@ -1,10 +1,10 @@
 const User = require('../models/user');
 
-function handleError(err, res, req) {
+function handleError(err, res) {
   const ERROR_CODE = 400;
   const ERROR_ID = 404;
   const ERROR_SERVER = 500;
-  if (err.name === 'ValidationError' || err === 'errorValid') {
+  if (err.name === 'ValidationError' || err.name === 'CastError' || err === 'errorValid') {
     res.status(ERROR_CODE).send({ message: 'Переданы некорректные данные в методы создания карточки, пользователя, обновления аватара пользователя или профиля' });
     return;
   }
@@ -34,7 +34,7 @@ module.exports.doesUserExist = (req, res) => {
       }
       res.send(user);
     })
-    .catch((err) => handleError(err, res, req));
+    .catch((err) => handleError(err, res));
 };
 
 module.exports.createUser = (req, res) => {
