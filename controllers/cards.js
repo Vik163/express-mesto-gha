@@ -16,7 +16,7 @@ function handleError(err, res, req) {
 }
 
 function addError(res, req, card) {
-  if ((res.statusCode === 200 && card === null) || card === []) {
+  if ((res.statusCode === 200 && card === null)) {
     const err = 'error';
     throw err;
   }
@@ -46,6 +46,9 @@ module.exports.createCard = (req, res) => {
 module.exports.deleteCard = (req, res) => {
   Card.findOneAndDelete({ owner: req.params.cardId })
     .then((card) => {
+      if (card === []) {
+        card = null;
+      }
       addError(res, req, card);
       res.send(card);
     })
