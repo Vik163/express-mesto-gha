@@ -4,11 +4,11 @@ function handleError(err, res, req) {
   const ERROR_CODE = 400;
   const ERROR_ID = 404;
   const ERROR_SERVER = 500;
-  if (err.name === 'ValidationError' || !(req.user._id === req.params.userId)) {
+  if (err.name === 'ValidationError' && err === 'errorValid') {
     res.status(ERROR_CODE).send({ message: 'Переданы некорректные данные в методы создания карточки, пользователя, обновления аватара пользователя или профиля' });
     return;
   }
-  if (req.user._id === undefined) {
+  if (err === 'error') {
     res.status(ERROR_ID).send({ message: 'Карточка или пользователь не найден' });
     return;
   }
@@ -17,14 +17,23 @@ function handleError(err, res, req) {
 
 module.exports.getUsers = (req, res) => {
   User.find({})
-    .then((users) => res.send({ data: users }))
+    .then((users) => res.send(users))
     .catch((err) => handleError(err, res));
 };
 
 module.exports.doesUserExist = (req, res) => {
-  console.log(req.user._id)
-  User.findById(req.params.userId)
-    .then((user) => res.send({ data: user }))
+  User.findOne({ _id: req.params.userId })
+    .then((user) => {
+      if (res.statusCode === 200 && user === null) {
+        const err = 'error';
+        throw err;
+      }
+      if (!(req.user._id === req.params.userId)) {
+        const err = 'errorValid';
+        throw err;
+      }
+      res.send(user);
+    })
     .catch((err) => handleError(err, res, req));
 };
 
@@ -42,6 +51,7 @@ module.exports.updateUser = (req, res) => {
     req.user._id,
     { name, about, avatar },
     {
+
       new: true,
       runValidators: true,
     },
