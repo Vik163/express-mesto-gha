@@ -16,7 +16,7 @@ function handleError(err, res, req) {
 }
 
 function addError(res, req, card) {
-  if (res.statusCode === 200 && card === null) {
+  if ((res.statusCode === 200 && card === null) || card === []) {
     const err = 'error';
     throw err;
   }
