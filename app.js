@@ -1,5 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const process = require('process');
 
 const { PORT = 3000 } = process.env;
 
@@ -24,6 +25,12 @@ app.use((req, res, next) => {
 
 app.use('/users', require('./routes/users'));
 app.use('/cards', require('./routes/cards'));
+
+app.use('*', (req, res) => {
+  const ERROR_CODE = 404;
+  Promise.reject(new Error('Ошибка'))
+    .catch(() => res.status(ERROR_CODE).send({ message: 'Некорректный путь' }));
+});
 
 app.listen(PORT, () => {
 });
