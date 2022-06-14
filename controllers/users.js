@@ -22,12 +22,8 @@ module.exports.getUsers = (req, res) => {
 };
 
 module.exports.doesUserExist = (req, res) => {
-  User.findOne({ _id: req.params.userId })
+  User.findById(req.params.userId)
     .then((user) => {
-      if (res.statusCode === 200 && user === null) {
-        const err = 'error';
-        throw err;
-      }
       if (!(req.user._id === req.params.userId)) {
         const err = 'errorValid';
         throw err;
