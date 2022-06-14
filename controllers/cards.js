@@ -1,6 +1,5 @@
 const Card = require('../models/card');
 
-
 function handleError(err, res, req) {
   const ERROR_CODE = 400;
   const ERROR_ID = 404;
@@ -21,10 +20,10 @@ function addError(res, req, card) {
     const err = 'error';
     throw err;
   }
-  // if (!(req.user._id === req.params.cardId)) {
-  //   const err = 'errorValid';
-  //   throw err;
-  // }
+  if (!(req.user._id === req.params.cardId)) {
+    const err = 'errorValid';
+    throw err;
+  }
 }
 
 module.exports.getCards = (req, res) => {
