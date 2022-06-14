@@ -1,5 +1,6 @@
 const Card = require('../models/card');
 
+
 function handleError(err, res, req) {
   const ERROR_CODE = 400;
   const ERROR_ID = 404;
@@ -20,10 +21,10 @@ function addError(res, req, card) {
     const err = 'error';
     throw err;
   }
-  if (!(req.user._id === req.params.cardId)) {
-    const err = 'errorValid';
-    throw err;
-  }
+  // if (!(req.user._id === req.params.cardId)) {
+  //   const err = 'errorValid';
+  //   throw err;
+  // }
 }
 
 module.exports.getCards = (req, res) => {
@@ -36,15 +37,15 @@ module.exports.getCards = (req, res) => {
 
 module.exports.createCard = (req, res) => {
   const { name, link } = req.body;
-  const owner = req.user._id;
 
-  Card.create({ name, link, owner })
+  Card.create({ name, link, owner: req.user._id })
     .then((card) => res.send(card))
     .catch((err) => handleError(err, res));
 };
 
 module.exports.deleteCard = (req, res) => {
-  Card.findOneAndRemove({ _id: req.params.cardId })
+  Card.findOneAndRemove({ _id: req.params.cardId, owner: req.user._id })
+    .populate('owner')
     .then((card) => {
       addError(res, req, card);
       res.send(card);
@@ -54,7 +55,7 @@ module.exports.deleteCard = (req, res) => {
 
 module.exports.addLike = (req, res) => {
   Card.findOneAndUpdate(
-    { _id: req.params.cardId },
+    { _id: req.params.cardId, owner: req.user._id },
     { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
     {
       new: true,
@@ -70,7 +71,7 @@ module.exports.addLike = (req, res) => {
 
 module.exports.deleteLike = (req, res) => {
   Card.findOneAndUpdate(
-    { _id: req.params.cardId },
+    { _id: req.params.cardId, owner: req.user._id },
     { $pull: { likes: req.user._id } }, // убрать _id из массива
     {
       new: true,
