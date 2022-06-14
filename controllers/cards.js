@@ -15,17 +15,6 @@ function handleError(err, res, req) {
   res.status(ERROR_SERVER).send({ message: 'На сервере произошла ошибка' });
 }
 
-function addError(res, req, card) {
-  if ((res.statusCode === 200 && card === null)) {
-    const err = 'error';
-    throw err;
-  }
-  if (!(req.user._id === req.params.cardId)) {
-    const err = 'errorValid';
-    throw err;
-  }
-}
-
 module.exports.getCards = (req, res) => {
   Card.find()
     .then((cards) => {
@@ -46,7 +35,6 @@ module.exports.deleteCard = (req, res) => {
   Card.findOneAndRemove({ _id: req.params.cardId, owner: req.user._id })
     .populate('owner')
     .then((card) => {
-      addError(res, req, card);
       res.send(card);
     })
     .catch((err) => handleError(err, res));
@@ -62,7 +50,6 @@ module.exports.addLike = (req, res) => {
     },
   )
     .then((card) => {
-      addError(res, req, card);
       res.send(card);
     })
     .catch((err) => handleError(err, res));
@@ -78,7 +65,6 @@ module.exports.deleteLike = (req, res) => {
     },
   )
     .then((card) => {
-      addError(res, req, card);
       res.send(card);
     })
     .catch((err) => handleError(err, res));
