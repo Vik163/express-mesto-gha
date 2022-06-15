@@ -4,6 +4,7 @@ function handleError(err, res) {
   const ERROR_CODE = 400;
   const ERROR_ID = 404;
   const ERROR_SERVER = 500;
+
   if (err.name === 'ValidationError' || err.name === 'CastError' || err === 'errorValid') {
     res.status(ERROR_CODE).send({ message: 'Переданы некорректные данные в методы создания карточки, пользователя, обновления аватара пользователя или профиля' });
     return;
@@ -24,10 +25,11 @@ module.exports.getUsers = (req, res) => {
 module.exports.doesUserExist = (req, res) => {
   User.findById(req.params.userId)
     .then((user) => {
-      if (!(req.user._id === req.params.userId)) {
-        const err = 'errorValid';
+      if ((res.statusCode === 200 && user === null)) {
+        const err = 'error';
         throw err;
       }
+
       res.send(user);
     })
     .catch((err) => handleError(err, res));
