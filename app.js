@@ -48,8 +48,10 @@ app.use('*', (req, res) => {
 
 app.use(errors());
 
-app.use((err, req, res) => {
-  res.status(err.status).send(err.message);
+app.use((err, req, res, next) => {
+  res.status(err.status).send({ message: err.message });
+
+  next();
 });
 
 app.listen(PORT, () => {

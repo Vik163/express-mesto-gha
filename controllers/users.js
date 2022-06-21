@@ -104,7 +104,6 @@ module.exports.doesUserExist = (req, res, next) => {
 };
 
 module.exports.createUser = (req, res, next) => {
-  console.log('o');
   const {
     name,
     about,
@@ -125,7 +124,6 @@ module.exports.createUser = (req, res, next) => {
       res.send({ user });
     })
     .catch((err) => {
-      console.log(err)
       const error = handleError(err);
       next(error);
     });
