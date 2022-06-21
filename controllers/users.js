@@ -1,28 +1,93 @@
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
+
 const User = require('../models/user');
 
-function handleError(err, res) {
+function handleError(err) {
   const ERROR_CODE = 400;
+  const ERROR_LOGIN = 401;
   const ERROR_ID = 404;
+  const ERROR_EMAIL = 409;
   const ERROR_SERVER = 500;
 
   if (err.name === 'ValidationError' || err.name === 'CastError' || err === 'errorValid') {
-    res.status(ERROR_CODE).send({ message: 'Переданы некорректные данные в методы создания карточки, пользователя, обновления аватара пользователя или профиля' });
-    return;
+    return {
+      status: ERROR_CODE,
+      message: 'Переданы некорректные данные в методы создания карточки, пользователя, обновления аватара пользователя или профиля',
+    };
+  }
+  if (err.message === 'Неправильные почта или пароль') {
+    return {
+      status: ERROR_LOGIN,
+      message: err.message,
+    };
   }
   if (err === 'error') {
-    res.status(ERROR_ID).send({ message: 'Карточка или пользователь не найден' });
-    return;
+    return {
+      status: ERROR_ID,
+      message: 'Карточка или пользователь не найден',
+    };
   }
-  res.status(ERROR_SERVER).send({ message: 'На сервере произошла ошибка' });
+  if (err.code === 11000) {
+    return {
+      status: ERROR_EMAIL,
+      message: 'При регистрации указан email, который уже существует на сервере',
+    };
+  }
+  return {
+    status: ERROR_SERVER,
+    message: 'На сервере произошла ошибка',
+  };
 }
 
-module.exports.getUsers = (req, res) => {
-  User.find({})
-    .then((users) => res.send(users))
-    .catch((err) => handleError(err, res));
+module.exports.login = (req, res, next) => {
+  const { email, password } = req.body;
+
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = `Bearer ${jwt.sign(
+        { _id: user._id },
+        'secret-key',
+        { expiresIn: '7d' },
+      )}`;
+      res.cookie('jwt', token, {
+        maxAge: 3600000 * 24 * 7,
+        httpOnly: true,
+      });
+      res.send('Set Cookie');
+    })
+    .catch((err) => {
+      const error = handleError(err);
+      next(error);
+    });
 };
 
-module.exports.doesUserExist = (req, res) => {
+module.exports.getUsers = (req, res, next) => {
+  User.find({})
+    .then((users) => res.send(users))
+    .catch((err) => {
+      const error = handleError(err);
+      next(error);
+    });
+};
+
+module.exports.getCurrentUser = (req, res, next) => {
+  User.findById(req.user._id)
+    .then((user) => {
+      // if ((res.statusCode === 200 && user === null)) {
+      //   const err = 'error';
+      //   throw err;
+      // }
+
+      res.send(user);
+    })
+    .catch((err) => {
+      const error = handleError(err);
+      next(error);
+    });
+};
+
+module.exports.doesUserExist = (req, res, next) => {
   User.findById(req.params.userId)
     .then((user) => {
       if ((res.statusCode === 200 && user === null)) {
@@ -32,17 +97,38 @@ module.exports.doesUserExist = (req, res) => {
 
       res.send(user);
     })
-    .catch((err) => handleError(err, res));
+    .catch((err) => {
+      const error = handleError(err);
+      next(error);
+    });
 };
 
-module.exports.createUser = (req, res) => {
-  const { name, about, avatar } = req.body;
+module.exports.createUser = (req, res, next) => {
+  const {
+    name,
+    about,
+    avatar,
+    email,
+    password,
+  } = req.body;
 
-  User.create({ name, about, avatar })
-    .then((user) => res.send({ data: user }))
-    .catch((err) => handleError(err, res));
+  bcrypt.hash(password, 10)
+    .then((hash) => User.create({
+      name,
+      about,
+      avatar,
+      email,
+      password: hash,
+    }))
+    .then((user) => {
+      res.send({ user });
+    })
+    .catch((err) => {
+      const error = handleError(err);
+      next(error);
+    });
 };
-module.exports.updateUser = (req, res) => {
+module.exports.updateUser = (req, res, next) => {
   const { name, about, avatar } = req.body;
 
   User.findByIdAndUpdate(
@@ -54,9 +140,12 @@ module.exports.updateUser = (req, res) => {
     },
   )
     .then((user) => res.send({ data: user }))
-    .catch((err) => handleError(err, res));
+    .catch((err) => {
+      const error = handleError(err);
+      next(error);
+    });
 };
-module.exports.updateUserAvatar = (req, res) => {
+module.exports.updateUserAvatar = (req, res, next) => {
   const { avatar } = req.body;
 
   User.findByIdAndUpdate(
@@ -68,5 +157,8 @@ module.exports.updateUserAvatar = (req, res) => {
     },
   )
     .then((user) => res.send({ data: user }))
-    .catch((err) => handleError(err, res));
+    .catch((err) => {
+      const error = handleError(err);
+      next(error);
+    });
 };
