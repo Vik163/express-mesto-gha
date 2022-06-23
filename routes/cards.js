@@ -10,6 +10,7 @@ const {
   addLike,
   deleteLike,
 } = require('../controllers/cards');
+
 router.use(cookieParser());
 
 router.get('/', auth, getCards);

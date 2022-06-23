@@ -41,7 +41,6 @@ function handleError(err) {
 }
 
 module.exports.createUser = (req, res, next) => {
-  console.log('i');
   const {
     name,
     about,
@@ -68,8 +67,6 @@ module.exports.createUser = (req, res, next) => {
 };
 
 module.exports.login = (req, res, next) => {
-  console.log('y');
-
   const { email, password } = req.body;
 
   User.findUserByCredentials(email, password)
@@ -92,8 +89,6 @@ module.exports.login = (req, res, next) => {
 };
 
 module.exports.getUsers = (req, res, next) => {
-  console.log('o');
-
   User.find({})
     .then((users) => res.send(users))
     .catch((err) => {
@@ -103,14 +98,12 @@ module.exports.getUsers = (req, res, next) => {
 };
 
 module.exports.getCurrentUser = (req, res, next) => {
-  console.log('a');
-
   User.findById(req.user._id)
     .then((user) => {
-      // if ((res.statusCode === 200 && user === null)) {
-      //   const err = 'error';
-      //   throw err;
-      // }
+      if ((res.statusCode === 200 && user === null)) {
+        const err = 'error';
+        throw err;
+      }
 
       res.send(user);
     })
@@ -121,8 +114,6 @@ module.exports.getCurrentUser = (req, res, next) => {
 };
 
 module.exports.doesUserExist = (req, res, next) => {
-  console.log('u');
-
   User.findById(req.params.userId)
     .then((user) => {
       if ((res.statusCode === 200 && user === null)) {
@@ -139,8 +130,6 @@ module.exports.doesUserExist = (req, res, next) => {
 };
 
 module.exports.updateUser = (req, res, next) => {
-  console.log('e');
-
   const { name, about, avatar } = req.body;
 
   User.findByIdAndUpdate(
@@ -158,8 +147,6 @@ module.exports.updateUser = (req, res, next) => {
     });
 };
 module.exports.updateUserAvatar = (req, res, next) => {
-  console.log('q');
-
   const { avatar } = req.body;
 
   User.findByIdAndUpdate(
