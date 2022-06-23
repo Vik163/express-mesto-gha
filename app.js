@@ -9,9 +9,9 @@ const { celebrate, Joi, errors } = require('celebrate');
 
 const app = express();
 
-const cookieParser = require('cookie-parser');
+// const cookieParser = require('cookie-parser');
 const { createUser, login } = require('./controllers/users');
-const auth = require('./middlewares/auth');
+// const auth = require('./middlewares/auth');
 
 mongoose.connect('mongodb://localhost:27017/mestodb', {
   useNewUrlParser: true,
@@ -35,8 +35,10 @@ app.post('/users/signin', celebrate({
     password: Joi.string().required().min(6),
   }),
 }), login);
-app.use(cookieParser());
-app.use(auth);
+
+// app.use(cookieParser());
+// app.use(auth);
+
 app.use('/users', require('./routes/users'));
 app.use('/cards', require('./routes/cards'));
 

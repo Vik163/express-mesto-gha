@@ -40,70 +40,8 @@ function handleError(err) {
   };
 }
 
-module.exports.login = (req, res, next) => {
-  const { email, password } = req.body;
-
-  return User.findUserByCredentials(email, password)
-    .then((user) => {
-      const token = `Bearer ${jwt.sign(
-        { _id: user._id },
-        'secret-key',
-        { expiresIn: '7d' },
-      )}`;
-      res.cookie('jwt', token, {
-        maxAge: 3600000 * 24 * 7,
-        httpOnly: true,
-      });
-      res.send('Set Cookie');
-    })
-    .catch((err) => {
-      const error = handleError(err);
-      next(error);
-    });
-};
-
-module.exports.getUsers = (req, res, next) => {
-  User.find({})
-    .then((users) => res.send(users))
-    .catch((err) => {
-      const error = handleError(err);
-      next(error);
-    });
-};
-
-module.exports.getCurrentUser = (req, res, next) => {
-  User.findById(req.user._id)
-    .then((user) => {
-      // if ((res.statusCode === 200 && user === null)) {
-      //   const err = 'error';
-      //   throw err;
-      // }
-
-      res.send(user);
-    })
-    .catch((err) => {
-      const error = handleError(err);
-      next(error);
-    });
-};
-
-module.exports.doesUserExist = (req, res, next) => {
-  User.findById(req.params.userId)
-    .then((user) => {
-      if ((res.statusCode === 200 && user === null)) {
-        const err = 'error';
-        throw err;
-      }
-
-      res.send(user);
-    })
-    .catch((err) => {
-      const error = handleError(err);
-      next(error);
-    });
-};
-
 module.exports.createUser = (req, res, next) => {
+  console.log('i');
   const {
     name,
     about,
@@ -128,7 +66,81 @@ module.exports.createUser = (req, res, next) => {
       next(error);
     });
 };
+
+module.exports.login = (req, res, next) => {
+  console.log('y');
+
+  const { email, password } = req.body;
+
+  User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = `Bearer ${jwt.sign(
+        { _id: user._id },
+        'secret-key',
+        { expiresIn: '7d' },
+      )}`;
+      res.cookie('jwt', token, {
+        maxAge: 3600000 * 24 * 7,
+        httpOnly: true,
+      });
+      res.send('Set Cookie');
+    })
+    .catch((err) => {
+      const error = handleError(err);
+      next(error);
+    });
+};
+
+module.exports.getUsers = (req, res, next) => {
+  console.log('o');
+
+  User.find({})
+    .then((users) => res.send(users))
+    .catch((err) => {
+      const error = handleError(err);
+      next(error);
+    });
+};
+
+module.exports.getCurrentUser = (req, res, next) => {
+  console.log('a');
+
+  User.findById(req.user._id)
+    .then((user) => {
+      // if ((res.statusCode === 200 && user === null)) {
+      //   const err = 'error';
+      //   throw err;
+      // }
+
+      res.send(user);
+    })
+    .catch((err) => {
+      const error = handleError(err);
+      next(error);
+    });
+};
+
+module.exports.doesUserExist = (req, res, next) => {
+  console.log('u');
+
+  User.findById(req.params.userId)
+    .then((user) => {
+      if ((res.statusCode === 200 && user === null)) {
+        const err = 'error';
+        throw err;
+      }
+
+      res.send(user);
+    })
+    .catch((err) => {
+      const error = handleError(err);
+      next(error);
+    });
+};
+
 module.exports.updateUser = (req, res, next) => {
+  console.log('e');
+
   const { name, about, avatar } = req.body;
 
   User.findByIdAndUpdate(
@@ -146,6 +158,8 @@ module.exports.updateUser = (req, res, next) => {
     });
 };
 module.exports.updateUserAvatar = (req, res, next) => {
+  console.log('q');
+
   const { avatar } = req.body;
 
   User.findByIdAndUpdate(
