@@ -41,6 +41,7 @@ function handleError(err) {
 }
 
 module.exports.createUser = (req, res, next) => {
+  console.log('i');
   const {
     name,
     about,
