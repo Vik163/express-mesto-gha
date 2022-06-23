@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 
 module.exports = (req, res, next) => {
   const authorization = req.cookies.jwt;
+  console.log(authorization)
   const loginError = {
     status: 401,
     message: 'Неправильные почта или пароль',
