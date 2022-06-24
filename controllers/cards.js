@@ -11,27 +11,28 @@ function handleError(err, req) {
       message: 'Переданы некорректные данные в методы создания карточки, пользователя, обновления аватара пользователя или профиля',
     };
   }
-  if (!(req.baseUrl === 'cards')) {
-    // res.status(ERROR_ID).send({ message: 'Карточка или пользователь не найден' });
-    return {
-      status: ERROR_ID,
-      message: 'Карточка или пользователь не найден',
-    };
-  }
+
   if (err === 'error') {
-    // res.status(ERROR_ID).send({ message: 'Карточка или пользователь не найден' });
     return {
       status: ERROR_DELETE_CARD,
       message: 'Попытка удалить чужую карточку',
     };
   }
+
+  if (!(req.baseUrl === 'cards')) {
+    return {
+      status: ERROR_ID,
+      message: 'Карточка или пользователь не найден',
+    };
+  }
+
   return {
     status: ERROR_SERVER,
     message: 'На сервере произошла ошибка',
   };
 }
 
-function addError(res, req, card) {
+function addError(res, card) {
   if ((res.statusCode === 200 && card === null)) {
     const err = 'error';
     throw err;
@@ -64,7 +65,7 @@ module.exports.deleteCard = (req, res, next) => {
   Card.findOneAndRemove({ _id: req.params.cardId, owner: req.user._id })
     .populate('owner')
     .then((card) => {
-      addError(res, req, card);
+      addError(res, card);
       res.send(card);
     })
     .catch((err) => {
@@ -83,7 +84,7 @@ module.exports.addLike = (req, res, next) => {
     },
   )
     .then((card) => {
-      addError(res, req, card);
+      addError(res, card);
       res.send(card);
     })
     .catch((err) => {
@@ -102,7 +103,7 @@ module.exports.deleteLike = (req, res, next) => {
     },
   )
     .then((card) => {
-      addError(res, req, card);
+      addError(res, card);
       res.send(card);
     })
     .catch((err) => {
