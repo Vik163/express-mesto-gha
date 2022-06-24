@@ -42,10 +42,16 @@ app.use(auth);
 app.use('/users', require('./routes/users'));
 app.use('/cards', require('./routes/cards'));
 
-app.use('*', (req, res) => {
+app.use('*', (req, res, next) => {
   const ERROR_CODE = 404;
   Promise.reject(new Error('Ошибка'))
-    .catch(() => res.status(ERROR_CODE).send({ message: 'Некорректный путь' }));
+    .catch(() => {
+      const error = {
+        status: ERROR_CODE,
+        message: 'Некорректный путь',
+      };
+      next(error);
+    });
 });
 
 app.use(errors());
