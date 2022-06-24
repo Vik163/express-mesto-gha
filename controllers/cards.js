@@ -1,6 +1,6 @@
 const Card = require('../models/card');
 
-function handleError(err, req) {
+function handleError(err) {
   const ERROR_CODE = 400;
   const ERROR_DELETE_CARD = 403;
   const ERROR_ID = 404;
@@ -12,14 +12,14 @@ function handleError(err, req) {
     };
   }
 
-  if (err === 'error') {
+  if (err === 'errorOwnerId') {
     return {
       status: ERROR_DELETE_CARD,
       message: 'Попытка удалить чужую карточку',
     };
   }
 
-  if (!(req.baseUrl === 'cards')) {
+  if (err === 'errorId') {
     return {
       status: ERROR_ID,
       message: 'Карточка или пользователь не найден',
@@ -34,7 +34,7 @@ function handleError(err, req) {
 
 function addError(res, card) {
   if ((res.statusCode === 200 && card === null)) {
-    const err = 'error';
+    const err = 'errorId';
     throw err;
   }
 }
@@ -62,14 +62,24 @@ module.exports.createCard = (req, res, next) => {
 };
 
 module.exports.deleteCard = (req, res, next) => {
-  Card.findOneAndRemove({ _id: req.params.cardId, owner: req.user._id })
-    .populate('owner')
+  Card.findOne({ _id: req.params.cardId })
     .then((card) => {
-      addError(res, card);
-      res.send(card);
+      if (!(card)) {
+        addError(res, card);
+      }
+      return Card.findOneAndRemove({ owner: req.user._id })
+        .populate('owner')
+        .then((cardOwnerId) => {
+          if (cardOwnerId === null) {
+            const err = 'errorOwnerId';
+            throw err;
+          }
+          res.send(card);
+        });
     })
+
     .catch((err) => {
-      const error = handleError(err, req);
+      const error = handleError(err);
       next(error);
     });
 };
