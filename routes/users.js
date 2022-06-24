@@ -13,7 +13,7 @@ router.get('/', getUsers);
 router.get('/me', getCurrentUser);
 router.get('/:userId', celebrate({
   params: Joi.object().keys({
-    postId: Joi.string().alphanum().length(24),
+    userId: Joi.string().alphanum().length(24),
   }),
 }), doesUserExist);
 router.patch('/me', celebrate({
