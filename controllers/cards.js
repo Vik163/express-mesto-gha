@@ -33,7 +33,7 @@ function handleError(err) {
 }
 
 function addError(res, card) {
-  if ((res.statusCode === 200 && card === null)) {
+  if ((res.statusCode === 200 && !card)) {
     const err = 'errorId';
     throw err;
   }
@@ -64,7 +64,7 @@ module.exports.createCard = (req, res, next) => {
 module.exports.deleteCard = (req, res, next) => {
   Card.findOne({ _id: req.params.cardId })
     .then((card) => {
-      if (!(card)) {
+      if (!card) {
         addError(res, card);
       }
       return Card.findOneAndRemove({ owner: req.user._id })

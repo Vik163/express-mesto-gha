@@ -40,6 +40,13 @@ function handleError(err) {
   };
 }
 
+function addError(res, user) {
+  if ((res.statusCode === 200 && !user)) {
+    const err = 'error';
+    throw err;
+  }
+}
+
 module.exports.createUser = (req, res, next) => {
   const {
     name,
@@ -105,10 +112,7 @@ module.exports.getUsers = (req, res, next) => {
 module.exports.getCurrentUser = (req, res, next) => {
   User.findById(req.user._id)
     .then((user) => {
-      if ((res.statusCode === 200 && user === null)) {
-        const err = 'error';
-        throw err;
-      }
+      addError(res, user);
 
       res.send(user);
     })
@@ -121,10 +125,7 @@ module.exports.getCurrentUser = (req, res, next) => {
 module.exports.doesUserExist = (req, res, next) => {
   User.findById(req.params.userId)
     .then((user) => {
-      if ((res.statusCode === 200 && user === null)) {
-        const err = 'error';
-        throw err;
-      }
+      addError(res, user);
 
       res.send(user);
     })
