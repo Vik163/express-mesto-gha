@@ -98,6 +98,7 @@ module.exports.getUsers = (req, res, next) => {
 };
 
 module.exports.getCurrentUser = (req, res, next) => {
+  console.log(req.user._id)
   User.findById(req.user._id)
     .then((user) => {
       if ((res.statusCode === 200 && user === null)) {
