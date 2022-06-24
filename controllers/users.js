@@ -80,7 +80,7 @@ module.exports.login = (req, res, next) => {
         maxAge: 3600000 * 24 * 7,
         httpOnly: true,
       });
-      res.send('Set Cookie');
+      res.send({ message: 'Всё верно!' });
     })
     .catch((err) => {
       const error = handleError(err);
