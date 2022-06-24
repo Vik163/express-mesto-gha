@@ -19,7 +19,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     validate: {
       validator(v) {
-        return /[https?]:\W{2}[www]?\W?([2-domains]|[-?ya]+)[\Wru]([\W\w{2,4}]?)*\W?.+#?/.test(v);
+        return /https?:\W{2}[www]?\W?([2-domains]|[-?\w+]+)[\Wru]([\W\w{2,}]?)*\W?.+#?/.test(v);
         // return /https?:\/\/[www]?([-\w.]+[a-z].?)*\/?.+#?/.test(v);
       },
       message: (props) => `${props.value} is not a valid`,
