@@ -3,17 +3,6 @@ const bcrypt = require('bcryptjs');
 
 const User = require('../models/user');
 
-// function handleError(err) {
-//   const ERROR_CODE = 400;
-
-//   if (err.name === 'ValidationError' || err.name === 'CastError' || err === 'errorValid') {
-//     return {
-//       status: ERROR_CODE,
-//       message: 'Переданы некорректные данные в методы создания карточки, пользователя, обновления аватара пользователя или профиля',
-//     };
-//   }
-// }
-
 function addError(res, user) {
   if ((res.statusCode === 200 && !user)) {
     const err = 'error';
@@ -55,7 +44,7 @@ module.exports.login = (req, res, next) => {
   User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign(
-        { _id: user.id },
+        { _id: user._id },
         'secret-key',
         { expiresIn: '7d' },
       );
@@ -75,7 +64,7 @@ module.exports.getUsers = (req, res, next) => {
 };
 
 module.exports.getCurrentUser = (req, res, next) => {
-  User.findById(req.user.id)
+  User.findById(req.user._id)
     .then((user) => {
       addError(res, user);
 
@@ -98,7 +87,7 @@ module.exports.updateUser = (req, res, next) => {
   const { name, about, avatar } = req.body;
 
   User.findByIdAndUpdate(
-    req.user.id,
+    req.user._id,
     { name, about, avatar },
     {
       new: true,
@@ -112,7 +101,7 @@ module.exports.updateUserAvatar = (req, res, next) => {
   const { avatar } = req.body;
 
   User.findByIdAndUpdate(
-    req.user.id,
+    req.user._id,
     { avatar },
     {
       new: true,

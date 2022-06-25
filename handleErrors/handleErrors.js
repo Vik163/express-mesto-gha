@@ -18,6 +18,9 @@ const handleErrors = (err, req, res, next) => {
   if (err === 'errorOwnerId') {
     throw new ErrorOwnerId('Попытка удалить чужую карточку');
   }
+  if (err.message === 'Некорректный путь') {
+    throw new ErrorNotFound('Некорректный путь');
+  }
   next(err);
 };
 
