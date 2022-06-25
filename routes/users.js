@@ -11,9 +11,11 @@ const {
 
 router.get('/', getUsers);
 router.get('/me', getCurrentUser);
+// пропустил эту ошибку
+
 router.get('/:userId', celebrate({
   params: Joi.object().keys({
-    userId: Joi.string().alphanum().length(24),
+    userId: Joi.string().hex().length(24),
   }),
 }), doesUserExist);
 router.patch('/me', celebrate({

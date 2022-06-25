@@ -29,7 +29,6 @@ module.exports.deleteCard = (req, res, next) => {
       if (!card) {
         addError(res, card);
       }
-      // сделал два поиска для того, чтобы разделить ошибки 404 и 403
       return Card.findOneAndRemove({ _id: req.params.cardId, owner: req.user._id })
         .populate('owner')
         .then((cardOwnerId) => {
