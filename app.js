@@ -1,17 +1,17 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const process = require('process');
+const mongoose = require('mongoose');
+const cookieParser = require('cookie-parser');
+const { celebrate, Joi, errors } = require('celebrate');
+
+const { createUser, login } = require('./controllers/users');
+const auth = require('./middlewares/auth');
+const handleErrors = require('./handleErrors/handleErrors');
 
 const { PORT = 3000 } = process.env;
 
-const mongoose = require('mongoose');
-const { celebrate, Joi, errors } = require('celebrate');
-
 const app = express();
-
-const cookieParser = require('cookie-parser');
-const { createUser, login } = require('./controllers/users');
-const auth = require('./middlewares/auth');
 
 mongoose.connect('mongodb://localhost:27017/mestodb', {
   useNewUrlParser: true,
@@ -55,9 +55,17 @@ app.use('*', (req, res, next) => {
 });
 
 app.use(errors());
+app.use(handleErrors);
 
+// eslint-disable-next-line consistent-return
 app.use((err, req, res, next) => {
-  res.status(err.status).send({ message: err.message });
+  if (err.statusCode) {
+    return res.status(err.statusCode).send({ message: err.message });
+  }
+
+  // console.error(err.stack);
+
+  res.status(500).send({ message: 'Что-то пошло не так' });
 
   next();
 });

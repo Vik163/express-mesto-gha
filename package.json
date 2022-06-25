@@ -2,11 +2,10 @@
   "name": "express-mesto-gha",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
     "dev": "nodemon app.js",
     "start": "node app.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "npx eslint ."
   },
   "repository": {
@@ -26,7 +25,6 @@
     "celebrate": "^15.0.1",
     "cookie-parser": "^1.4.6",
     "express": "^4.18.1",
-    "joi": "^17.6.0",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^6.3.6",
     "validator": "^13.7.0"

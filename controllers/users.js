@@ -3,42 +3,16 @@ const bcrypt = require('bcryptjs');
 
 const User = require('../models/user');
 
-function handleError(err) {
-  const ERROR_CODE = 400;
-  const ERROR_LOGIN = 401;
-  const ERROR_ID = 404;
-  const ERROR_EMAIL = 409;
-  const ERROR_SERVER = 500;
+// function handleError(err) {
+//   const ERROR_CODE = 400;
 
-  if (err.name === 'ValidationError' || err.name === 'CastError' || err === 'errorValid') {
-    return {
-      status: ERROR_CODE,
-      message: 'Переданы некорректные данные в методы создания карточки, пользователя, обновления аватара пользователя или профиля',
-    };
-  }
-  if (err.message === 'Неправильные почта или пароль') {
-    return {
-      status: ERROR_LOGIN,
-      message: err.message,
-    };
-  }
-  if (err === 'error') {
-    return {
-      status: ERROR_ID,
-      message: 'Карточка или пользователь не найден',
-    };
-  }
-  if (err.code === 11000) {
-    return {
-      status: ERROR_EMAIL,
-      message: 'При регистрации указан email, который уже существует на сервере',
-    };
-  }
-  return {
-    status: ERROR_SERVER,
-    message: 'На сервере произошла ошибка',
-  };
-}
+//   if (err.name === 'ValidationError' || err.name === 'CastError' || err === 'errorValid') {
+//     return {
+//       status: ERROR_CODE,
+//       message: 'Переданы некорректные данные в методы создания карточки, пользователя, обновления аватара пользователя или профиля',
+//     };
+//   }
+// }
 
 function addError(res, user) {
   if ((res.statusCode === 200 && !user)) {
@@ -72,10 +46,7 @@ module.exports.createUser = (req, res, next) => {
         email: user.email,
       });
     })
-    .catch((err) => {
-      const error = handleError(err);
-      next(error);
-    });
+    .catch((err) => next(err));
 };
 
 module.exports.login = (req, res, next) => {
@@ -83,43 +54,34 @@ module.exports.login = (req, res, next) => {
 
   User.findUserByCredentials(email, password)
     .then((user) => {
-      const token = `Bearer ${jwt.sign(
-        { _id: user._id },
+      const token = jwt.sign(
+        { _id: user.id },
         'secret-key',
         { expiresIn: '7d' },
-      )}`;
+      );
       res.cookie('jwt', token, {
         maxAge: 3600000 * 24 * 7,
         httpOnly: true,
       });
       res.send({ message: 'Всё верно!' });
     })
-    .catch((err) => {
-      const error = handleError(err);
-      next(error);
-    });
+    .catch((err) => next(err));
 };
 
 module.exports.getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send(users))
-    .catch((err) => {
-      const error = handleError(err);
-      next(error);
-    });
+    .catch((err) => next(err));
 };
 
 module.exports.getCurrentUser = (req, res, next) => {
-  User.findById(req.user._id)
+  User.findById(req.user.id)
     .then((user) => {
       addError(res, user);
 
       res.send(user);
     })
-    .catch((err) => {
-      const error = handleError(err);
-      next(error);
-    });
+    .catch((err) => next(err));
 };
 
 module.exports.doesUserExist = (req, res, next) => {
@@ -129,17 +91,14 @@ module.exports.doesUserExist = (req, res, next) => {
 
       res.send(user);
     })
-    .catch((err) => {
-      const error = handleError(err);
-      next(error);
-    });
+    .catch((err) => next(err));
 };
 
 module.exports.updateUser = (req, res, next) => {
   const { name, about, avatar } = req.body;
 
   User.findByIdAndUpdate(
-    req.user._id,
+    req.user.id,
     { name, about, avatar },
     {
       new: true,
@@ -147,16 +106,13 @@ module.exports.updateUser = (req, res, next) => {
     },
   )
     .then((user) => res.send({ data: user }))
-    .catch((err) => {
-      const error = handleError(err);
-      next(error);
-    });
+    .catch((err) => next(err));
 };
 module.exports.updateUserAvatar = (req, res, next) => {
   const { avatar } = req.body;
 
   User.findByIdAndUpdate(
-    req.user._id,
+    req.user.id,
     { avatar },
     {
       new: true,
@@ -164,8 +120,5 @@ module.exports.updateUserAvatar = (req, res, next) => {
     },
   )
     .then((user) => res.send({ data: user }))
-    .catch((err) => {
-      const error = handleError(err);
-      next(error);
-    });
+    .catch((err) => next(err));
 };

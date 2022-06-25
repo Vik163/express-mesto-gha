@@ -1,40 +1,8 @@
 const Card = require('../models/card');
 
-function handleError(err) {
-  const ERROR_CODE = 400;
-  const ERROR_DELETE_CARD = 403;
-  const ERROR_ID = 404;
-  const ERROR_SERVER = 500;
-  if (err.name === 'ValidationError' || err.name === 'CastError' || err === 'errorValid') {
-    return {
-      status: ERROR_CODE,
-      message: 'Переданы некорректные данные в методы создания карточки, пользователя, обновления аватара пользователя или профиля',
-    };
-  }
-
-  if (err === 'errorOwnerId') {
-    return {
-      status: ERROR_DELETE_CARD,
-      message: 'Попытка удалить чужую карточку',
-    };
-  }
-
-  if (err === 'errorId') {
-    return {
-      status: ERROR_ID,
-      message: 'Карточка или пользователь не найден',
-    };
-  }
-
-  return {
-    status: ERROR_SERVER,
-    message: 'На сервере произошла ошибка',
-  };
-}
-
 function addError(res, card) {
   if ((res.statusCode === 200 && !card)) {
-    const err = 'errorId';
+    const err = 'error';
     throw err;
   }
 }
@@ -44,10 +12,7 @@ module.exports.getCards = (req, res, next) => {
     .then((cards) => {
       res.send(cards);
     })
-    .catch((err) => {
-      const error = handleError(err, req);
-      next(error);
-    });
+    .catch((err) => next(err));
 };
 
 module.exports.createCard = (req, res, next) => {
@@ -55,10 +20,7 @@ module.exports.createCard = (req, res, next) => {
 
   Card.create({ name, link, owner: req.user._id })
     .then((card) => res.send(card))
-    .catch((err) => {
-      const error = handleError(err, req);
-      next(error);
-    });
+    .catch((err) => next(err));
 };
 
 module.exports.deleteCard = (req, res, next) => {
@@ -67,7 +29,8 @@ module.exports.deleteCard = (req, res, next) => {
       if (!card) {
         addError(res, card);
       }
-      return Card.findOneAndRemove({ owner: req.user._id })
+      // сделал два поиска для того, чтобы разделить ошибки 404 и 403
+      return Card.findOneAndRemove({ _id: req.params.cardId, owner: req.user._id })
         .populate('owner')
         .then((cardOwnerId) => {
           if (cardOwnerId === null) {
@@ -77,11 +40,7 @@ module.exports.deleteCard = (req, res, next) => {
           res.send(card);
         });
     })
-
-    .catch((err) => {
-      const error = handleError(err);
-      next(error);
-    });
+    .catch((err) => next(err));
 };
 
 module.exports.addLike = (req, res, next) => {
@@ -97,10 +56,7 @@ module.exports.addLike = (req, res, next) => {
       addError(res, card);
       res.send(card);
     })
-    .catch((err) => {
-      const error = handleError(err, req);
-      next(error);
-    });
+    .catch((err) => next(err));
 };
 
 module.exports.deleteLike = (req, res, next) => {
@@ -116,8 +72,5 @@ module.exports.deleteLike = (req, res, next) => {
       addError(res, card);
       res.send(card);
     })
-    .catch((err) => {
-      const error = handleError(err, req);
-      next(error);
-    });
+    .catch((err) => next(err));
 };
